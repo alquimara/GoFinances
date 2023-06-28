@@ -1,6 +1,7 @@
 
 import Styled from 'styled-components/native'
-import { Feather } from '@expo/vector-icons'
+import { AntDesign} from '@expo/vector-icons'
+
 import { RFValue } from 'react-native-responsive-fontsize';
 
 interface TransactionType {
@@ -40,7 +41,7 @@ align-items: center;
 
 `;
 
-export const Icon = Styled(Feather)`
+export const Icon = Styled(AntDesign)`
 font-size:${RFValue(20)}px;
 color:${({ theme }) => theme.colors.text};
 `;
@@ -48,7 +49,7 @@ color:${({ theme }) => theme.colors.text};
 export const CategoryName = Styled.Text`
 font-size:${RFValue(14)}px;
 color:${({ theme }) => theme.colors.text};
-margin-left:17px;
+margin-left:10px;
 
 `;
 

@@ -1,4 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
+import 'intl';
+import 'intl/locale-data/jsonp/pt-BR'
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { Dashboard } from './src/screen/Dashboard';

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import {
   Container,
@@ -19,6 +19,8 @@ import {
 
 import { HighlightCard } from '../../components/HighlightCard'
 import { TransactionCard, TransactionCardProps } from '../../components/TransactionCard'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native'
 
 
 export interface TransactionListProps extends TransactionCardProps {
@@ -26,53 +28,59 @@ export interface TransactionListProps extends TransactionCardProps {
 }
 
 export function Dashboard() {
-  const dados: TransactionListProps[] = [
-    {
-      id: '1',
-      type: 'saida',
-      title: 'Hamburguer',
-      amount: 'R$ 250,00',
-      category: {
-        name: 'Alimentação',
-        icon: 'dollar-sign'
-      },
-      date: '14/06/2023'
+  const datakey = '@goFinances:Transactions'
+ const[data,setData]=useState<TransactionCardProps[]>([])
 
-    },
-    {
-      id: '2',
-      type: 'saida',
-      title: 'Aluguel',
-      amount: 'R$ 900,00',
-      category: {
-        name: 'Moradia',
-        icon: 'dollar-sign'
-      },
-      date: '14/06/2023'
-    },
-    {
-      id: '3',
-      type: 'entrada',
-      title: 'Desenvolvimento de site',
-      amount: 'R$ 1.000,00',
-      category: {
-        name: 'Venda',
-        icon: 'dollar-sign'
-      },
-      date: '14/06/2023'
-    },
-    {
-      id: '4',
-      type: 'entrada',
-      title: 'Desenvolvimento de site',
-      amount: 'R$ 1.000,00',
-      category: {
-        name: 'Venda',
-        icon: 'dollar-sign'
-      },
-      date: '14/06/2023'
+ async function LoadingTrasaction(){
+  const dados = await AsyncStorage.getItem(datakey)
+  const transactions = dados ? JSON.parse(dados): []
+  console.log(transactions)
+  const transactionFormatted : TransactionListProps[] = transactions.map((item:TransactionListProps) =>{
+    const amount = Number(item.amount).toLocaleString('pt-BR',{
+      style:'currency',
+      currency:'BRL'
+    });
+    
+    const date = Intl.DateTimeFormat('pt-BR',{
+      day:'2-digit',
+      month:'2-digit',
+      year:'2-digit'
+    }).format(new Date(item.date));
+    return{
+      id: item.id,
+      name: item.name,
+      amount,
+      type:item.type,
+      category: item.category,
+      date,
     }
-  ]
+  }
+  
+  
+  )
+  setData(transactionFormatted)
+ }
+ async function deleteTrasaction(){
+  await AsyncStorage.removeItem(datakey)
+
+ }
+
+ useEffect(()=>{
+  LoadingTrasaction()
+  // deleteTrasaction()
+
+ 
+
+ },[])
+ useFocusEffect(useCallback(()=>{
+  LoadingTrasaction()
+
+ },[]))
+
+
+
+
+
   return (
     <Container>
       <Header>
@@ -96,7 +104,10 @@ export function Dashboard() {
       </HighlightCards>
       <Transactions>
         <Title>Listagem</Title>
-        <TransactionList data={dados} keyExtractor={item => item.id} renderItem={({ item }) => <TransactionCard data={item} />} />
+        <TransactionList 
+        data={data} 
+        keyExtractor={item => item.id} 
+        renderItem={({ item }) => <TransactionCard data={item} />} />
       </Transactions>
     </Container>
   )

@@ -9,33 +9,33 @@ import {
   CategoryName,
   Date
 } from './styles'
+import { Categorias } from '../../util/Categoria';
 
-interface CategoryCard {
-  name: string;
-  icon: string;
-}
+
 export interface TransactionCardProps {
-  type: 'entrada' | 'saida'
-  title: string;
+  name: string;
   amount: string;
-  category: CategoryCard;
+  type: 'entrada' | 'saida'
+  category: string;
   date: string;
 }
 interface PropsTransactionCard {
   data: TransactionCardProps
 }
 export const TransactionCard = ({ data }: PropsTransactionCard) => {
+  const [category] = Categorias.filter(item => item.key === data.category)
+  
   return (
     <Container>
-      <Title>{data.title}</Title>
+      <Title>{data.name}</Title>
       <Amount type={data.type}>
         {data.type === 'saida' && '-'}
         {data.amount}
       </Amount>
       <Footer>
         <Category>
-          <Icon name={data.category.icon} />
-          <CategoryName>{data.category.name}</CategoryName>
+          <Icon name={category.icon} />
+          <CategoryName>{category.name}</CategoryName>
         </Category>
         <Date>{data.date}</Date>
       </Footer>
