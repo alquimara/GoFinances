@@ -92,6 +92,12 @@ export const TransactionList = Styled(
 ).attrs({
   showsVerticalScrollIndicator: false
 })``;
+export const LoadingContainer = Styled.View`
+flex: 1;
+align-items: center;
+justify-content: center;
+
+`
 
 
 
