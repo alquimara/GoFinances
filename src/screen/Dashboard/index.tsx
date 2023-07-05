@@ -31,6 +31,7 @@ export interface TransactionListProps extends TransactionCardProps {
 }
 interface resultcard {
   totalsum:string;
+  lastTransaction:string;
 }
 interface resultcarddata{
   entrada:resultcard;
@@ -83,34 +84,58 @@ export function Dashboard() {
     }
   })
   setTransactionsData(transactionsFormatted)
+  const lastTransactionEntrada = LastTransactionDate(transactions, 'entrada')
+  const lastTransactionSaida = LastTransactionDate(transactions, 'saida')
+  const transactionInital = new Date(transactions[0].date).getDate()
+  const transactionFinal = DateFormatted(transactions.at(-1).date)
+  const lastTransactionTotal = `${transactionInital} a ${transactionFinal}`
+ 
+  
   const total = sumentrada - sumsaida;
   setResultCard({
     entrada:{
       totalsum: sumentrada.toLocaleString('pt-BR',{
         style: 'currency',
         currency:'BRL'
-      })
+      }),
+      lastTransaction:lastTransactionEntrada
     },
     saida:{
       totalsum:sumsaida.toLocaleString('pt-BR',{
         style:'currency',
         currency:'BRL'
-      })
+      }),
+      lastTransaction:lastTransactionSaida
     },
     result:{
       totalsum:total.toLocaleString('pt-BR',{
         style:'currency',
         currency: 'BRL'
-      })
+      }),
+      lastTransaction: lastTransactionTotal
     }
   })
   setIsLoading(false)
 
  }
+ function LastTransactionDate(collection:TransactionCardProps[], type: 'entrada' | 'saida'){
+  const lastTransactions = Math.max.apply(Math, collection.filter(transaction => 
+  transaction.type === type).map(transaction=> new Date(transaction.date).getTime()))
+  const dateformatted = DateFormatted(lastTransactions)
+  return dateformatted
+ }
 
 
  async function deleteTrasaction(){
   await AsyncStorage.removeItem(datakey)
+
+ }
+ function DateFormatted(data:Date){
+  return Intl.DateTimeFormat('pt-BR',{
+    day:'2-digit',
+    month:'long',
+    year:'numeric'
+  }).format(new Date(data))
 
  }
 
@@ -151,9 +176,9 @@ export function Dashboard() {
         </UserWrapper>
       </Header>
       <HighlightCards>
-        <HighlightCard type="entrada" title='Entradas' amount={resultcard.entrada.totalsum} lastTransaction={'Ultima transação dia 13 de abril'} />
-        <HighlightCard type="saida" title='Saidas' amount={resultcard.saida.totalsum} lastTransaction={'Ultima transação dia 20 de abril'} />
-        <HighlightCard type="total" title='Total' amount={resultcard.result.totalsum} lastTransaction={'Ultima transação dia 20 de abril'} />
+        <HighlightCard type="entrada" title='Entradas' amount={resultcard.entrada.totalsum} lastTransaction={`Ultima Transaçao ${resultcard.entrada.lastTransaction}`} />
+        <HighlightCard type="saida" title='Saidas' amount={resultcard.saida.totalsum} lastTransaction={`Ultima Transaçao ${resultcard.saida.lastTransaction}`} />
+        <HighlightCard type="total" title='Total' amount={resultcard.result.totalsum} lastTransaction={`Transações entre ${resultcard.result.lastTransaction}`} />
       </HighlightCards>
       <Transactions>
         <Title>Listagem</Title>
