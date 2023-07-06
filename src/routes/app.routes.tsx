@@ -5,6 +5,7 @@ import { Register } from '../screen/Register';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons'
+import { Resume } from '../screen/Resume';
 
 
 const { Navigator, Screen } = createBottomTabNavigator();
@@ -31,7 +32,7 @@ export const AppRoutes = () => {
       <Screen name='Adicionar' component={Register} options={{
         tabBarIcon: (({ color, size }) => <Feather name='plus-circle' size={size} color={color} />)
       }} />
-      <Screen name='Resumo' component={Dashboard} options={{
+      <Screen name='Resumo' component={Resume} options={{
         tabBarIcon: (({ color, size }) => <Feather name='pie-chart' size={size} color={color} />)
       }} />
     </Navigator >
