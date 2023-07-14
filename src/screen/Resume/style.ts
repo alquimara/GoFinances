@@ -22,3 +22,6 @@ font-family:${({ theme }) => theme.fonts.regular};
 color: ${({ theme }) => theme.colors.shape};
 font-size:${RFValue(18)}px;
 `;
+export const Content = Styled.ScrollView.attrs({
+    contentContainerStyle:{flex: 1, padding:24, }
+})``;
