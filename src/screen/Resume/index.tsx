@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Container, Header, Title,Content,ChartContainer } from './style'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Container, Header, Title,Content,ChartContainer,MonthSelect,MonthSelectButton,SelectIcon,Month } from './style'
 import { HistoryCard } from '../../components/HistoryCard'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { TransactionListProps } from '../Dashboard'
@@ -7,6 +7,7 @@ import { Categorias } from '../../util/Categoria'
 import { VictoryPie } from 'victory-native'
 import { RFValue } from 'react-native-responsive-fontsize'
 import { useTheme } from 'styled-components'
+import { useFocusEffect } from '@react-navigation/native'
 
 interface PropsCategory{
   key:string;
@@ -67,13 +68,28 @@ async function LoadingData(){
 useEffect(()=>{
     LoadingData()
 },[])
+useFocusEffect(useCallback(()=>{
+  LoadingData()
+
+ },[]))
+
+
   return (
     <Container>
         <Header>
             <Title>Resumo por categoria</Title>
         </Header>
         <Content>
-          <ChartContainer>
+        <MonthSelect>
+          <MonthSelectButton>
+            <SelectIcon name="chevron-left"/>
+          </MonthSelectButton>
+          <Month>Julho</Month>
+          <MonthSelectButton>
+            <SelectIcon  name="chevron-right"/>
+          </MonthSelectButton>
+        </MonthSelect>
+        <ChartContainer>
           <VictoryPie data={totalByCategory} x='percent' y='totalNumber' colorScale={totalByCategory.map(category=>category.color)}  innerRadius={0} labelRadius={60} style={
             {labels:
               {
@@ -86,7 +102,6 @@ useEffect(()=>{
             }
           }/>
           </ChartContainer>
-         
        {totalByCategory.map((item)=> <HistoryCard key={item.key} color={item.color} title={item.name} amount={item.total}/>
        )}
        </Content>
