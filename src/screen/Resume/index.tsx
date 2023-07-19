@@ -8,6 +8,8 @@ import { VictoryPie } from 'victory-native'
 import { RFValue } from 'react-native-responsive-fontsize'
 import { useTheme } from 'styled-components'
 import { useFocusEffect } from '@react-navigation/native'
+import {addMonths, subMonths, format} from 'date-fns'
+import { ptBR} from 'date-fns/locale'
 
 interface PropsCategory{
   key:string;
@@ -20,19 +22,22 @@ interface PropsCategory{
 
 export const Resume = () => {
     const datakey = '@goFinances:Transactions'
+    const [selectDate,setSelectDate]= useState(new Date());
     const [totalByCategory,setTotalByCategory]= useState<PropsCategory[]>([]);
     const theme = useTheme();
 
 async function LoadingData(){
     const data = await AsyncStorage.getItem(datakey)
     const currentData = data ? JSON.parse(data): []
-    const dataCategoria = currentData.filter((categoria:TransactionListProps)=> categoria.type === 'saida')
+    const dataCategoria = currentData.filter((categoria:TransactionListProps)=> categoria.type === 'saida' &&
+     new Date(categoria.date).getMonth() === selectDate.getMonth() &&
+     new Date(categoria.date).getFullYear() === selectDate.getFullYear()
+    
+    )
     const totalByCategoria:PropsCategory[] = [];
     const saidaTotal = dataCategoria.reduce((acc:number,saida:TransactionListProps)=>{
       return acc + Number(saida.amount)
     },0)
-
-    console.log(saidaTotal)
 
     Categorias.forEach(category =>{
         let categoriasoma = 0;
@@ -47,7 +52,6 @@ async function LoadingData(){
     })
 
     const percent = `${(categoriasoma /  saidaTotal * 100).toFixed(0)}%`
-   
   
       if(categoriasoma > 0){
         totalByCategoria.push({
@@ -62,16 +66,27 @@ async function LoadingData(){
       }
     })
     setTotalByCategory(totalByCategoria)
-    console.log(totalByCategory)
+
+
+}
+
+function handleDateChange(action: 'prev' | 'next' ){
+  if(action === 'next'){
+   setSelectDate(addMonths(selectDate, 1))
+   console.log(selectDate)
+  }
+  else{
+   setSelectDate(subMonths(selectDate, 1))
+   console.log(selectDate)
+  }
 
 }
 useEffect(()=>{
     LoadingData()
-},[])
+},[selectDate])
 useFocusEffect(useCallback(()=>{
   LoadingData()
-
- },[]))
+ },[selectDate]))
 
 
   return (
@@ -81,11 +96,11 @@ useFocusEffect(useCallback(()=>{
         </Header>
         <Content>
         <MonthSelect>
-          <MonthSelectButton>
+          <MonthSelectButton onPress={()=>handleDateChange('prev')}>
             <SelectIcon name="chevron-left"/>
           </MonthSelectButton>
-          <Month>Julho</Month>
-          <MonthSelectButton>
+          <Month>{format(selectDate, 'MMMM, yyy', {locale:ptBR})}</Month>
+          <MonthSelectButton onPress={()=>handleDateChange('next')}>
             <SelectIcon  name="chevron-right"/>
           </MonthSelectButton>
         </MonthSelect>
@@ -96,7 +111,6 @@ useFocusEffect(useCallback(()=>{
                 fontSize:RFValue(18),
                 fontWeight:'bold',
                 fill: theme.colors.shape,
-                
                 
               }
             }

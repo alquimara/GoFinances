@@ -49,7 +49,7 @@ export const MonthSelectButton = Styled.TouchableOpacity`
 `;
 
 export const SelectIcon = Styled(Feather)`
-font-size:${RFValue(24)}px;
+font-size:${RFValue(35)}px;
 `;
 
 export const Month = Styled.Text`
