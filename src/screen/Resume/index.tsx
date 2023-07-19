@@ -10,6 +10,8 @@ import { useTheme } from 'styled-components'
 import { useFocusEffect } from '@react-navigation/native'
 import {addMonths, subMonths, format} from 'date-fns'
 import { ptBR} from 'date-fns/locale'
+import { LoadingContainer } from '../Dashboard/styles'
+import { ActivityIndicator } from 'react-native'
 
 interface PropsCategory{
   key:string;
@@ -22,11 +24,13 @@ interface PropsCategory{
 
 export const Resume = () => {
     const datakey = '@goFinances:Transactions'
+    const[isLoading,setIsLoading]=useState(false)
     const [selectDate,setSelectDate]= useState(new Date());
     const [totalByCategory,setTotalByCategory]= useState<PropsCategory[]>([]);
     const theme = useTheme();
 
 async function LoadingData(){
+    setIsLoading(true)
     const data = await AsyncStorage.getItem(datakey)
     const currentData = data ? JSON.parse(data): []
     const dataCategoria = currentData.filter((categoria:TransactionListProps)=> categoria.type === 'saida' &&
@@ -66,24 +70,19 @@ async function LoadingData(){
       }
     })
     setTotalByCategory(totalByCategoria)
-
-
+    setIsLoading(false);
 }
 
 function handleDateChange(action: 'prev' | 'next' ){
   if(action === 'next'){
    setSelectDate(addMonths(selectDate, 1))
-   console.log(selectDate)
   }
   else{
    setSelectDate(subMonths(selectDate, 1))
-   console.log(selectDate)
   }
 
 }
-useEffect(()=>{
-    LoadingData()
-},[selectDate])
+
 useFocusEffect(useCallback(()=>{
   LoadingData()
  },[selectDate]))
@@ -94,6 +93,11 @@ useFocusEffect(useCallback(()=>{
         <Header>
             <Title>Resumo por categoria</Title>
         </Header>
+        {
+          isLoading ? 
+          <LoadingContainer>
+            <ActivityIndicator color={theme.colors.primary} size="large"/> 
+          </LoadingContainer>:
         <Content>
         <MonthSelect>
           <MonthSelectButton onPress={()=>handleDateChange('prev')}>
@@ -119,7 +123,7 @@ useFocusEffect(useCallback(()=>{
        {totalByCategory.map((item)=> <HistoryCard key={item.key} color={item.color} title={item.name} amount={item.total}/>
        )}
        </Content>
-
+}
     </Container>
   )
 }
