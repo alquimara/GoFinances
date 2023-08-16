@@ -2,9 +2,16 @@
   "expo": {
     "name": "goFinances",
     "slug": "goFinances",
+    "scheme": "goFinances",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0e0311de-1c14-41df-8e7a-a7a5b1ece894"
+      }
+    },
+    "owner": "alquimara"
   }
 }

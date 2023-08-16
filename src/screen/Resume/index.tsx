@@ -12,6 +12,7 @@ import {addMonths, subMonths, format} from 'date-fns'
 import { ptBR} from 'date-fns/locale'
 import { LoadingContainer } from '../Dashboard/styles'
 import { ActivityIndicator } from 'react-native'
+import { useAuth } from '../../Hooks/Auth'
 
 interface PropsCategory{
   key:string;
@@ -23,7 +24,8 @@ interface PropsCategory{
 }
 
 export const Resume = () => {
-    const datakey = '@goFinances:Transactions'
+    const {user}= useAuth();
+    const datakey = `@goFinances:Transactions_user:${user.id}`
     const[isLoading,setIsLoading]=useState(false)
     const [selectDate,setSelectDate]= useState(new Date());
     const [totalByCategory,setTotalByCategory]= useState<PropsCategory[]>([]);
@@ -109,10 +111,10 @@ useFocusEffect(useCallback(()=>{
           </MonthSelectButton>
         </MonthSelect>
         <ChartContainer>
-          <VictoryPie data={totalByCategory} x='percent' y='totalNumber' colorScale={totalByCategory.map(category=>category.color)}  innerRadius={0} labelRadius={60} style={
+          <VictoryPie data={totalByCategory} x='percent' y='totalNumber' colorScale={totalByCategory.map(category=>category.color)}  innerRadius={0} labelRadius={58} style={
             {labels:
               {
-                fontSize:RFValue(18),
+                fontSize:RFValue(16),
                 fontWeight:'bold',
                 fill: theme.colors.shape,
                 

@@ -12,6 +12,7 @@ import * as Yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
+import { useAuth } from '../../Hooks/Auth'
 
 
 interface PropsForm {
@@ -25,8 +26,9 @@ const schema = Yup.object().shape({
 })
 
 export const Register = () => {
+  const {user}= useAuth()
   const navigation = useNavigation();
-  const datakey = '@goFinances:Transactions'
+  const datakey = `@goFinances:Transactions_user:${user.id}`
   const [type, setType] = useState('');
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [category, setCategory] = useState({

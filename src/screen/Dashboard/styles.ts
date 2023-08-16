@@ -4,7 +4,7 @@ import { RFPercentage, RFValue } from 'react-native-responsive-fontsize'
 import { Feather } from '@expo/vector-icons'
 import { FlatList } from 'react-native';
 import { TransactionListProps } from '.';
-import { BorderlessButton } from 'react-native-gesture-handler'
+
 import { TransactionCardProps } from '../../components/TransactionCard';
 
 
@@ -60,7 +60,7 @@ color:${({ theme }) => theme.colors.shape}
 font-size:${RFValue(18)}px;
 font-family:${({ theme }) => theme.fonts.bold};
 `;
-export const LogoutButton = Styled(BorderlessButton)``;
+export const LogoutButton = Styled.TouchableOpacity``;
 export const Icon = Styled(Feather)`
 color:${({ theme }) => theme.colors.secondary}
 font-size:${RFValue(24)}px;

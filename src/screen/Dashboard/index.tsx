@@ -24,6 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
 import { ActivityIndicator } from 'react-native'
 import { useTheme } from 'styled-components'
+import { useAuth } from '../../Hooks/Auth'
 
 
 export interface TransactionListProps extends TransactionCardProps {
@@ -31,7 +32,7 @@ export interface TransactionListProps extends TransactionCardProps {
 }
 interface resultcard {
   totalsum:string;
-  lastTransaction:string;
+  lastTransaction:string | number
 }
 interface resultcarddata{
   entrada:resultcard;
@@ -41,17 +42,20 @@ interface resultcarddata{
 }
 
 export function Dashboard() {
-  const datakey = '@goFinances:Transactions'
- const[transactionsData,setTransactionsData]=useState<TransactionCardProps[]>([])
- const[resultcard, setResultCard] = useState<resultcarddata>({} as resultcarddata);
- const [isLoading,setIsLoading]= useState(true);
- const theme = useTheme();
+  const {signOut,user}= useAuth();
+  const datakey = `@goFinances:Transactions_user:${user.id}`
+  const[transactionsData,setTransactionsData]=useState<TransactionCardProps[]>([])
+  const[resultcard, setResultCard] = useState<resultcarddata>({} as resultcarddata);
+  const [isLoading,setIsLoading]= useState(true);
+  const theme = useTheme();
+
 
 
 
  async function LoadingTrasaction(){
- 
-  const dados = await AsyncStorage.getItem(datakey)
+
+  try {
+    const dados = await AsyncStorage.getItem(datakey)
   const transactions = dados ? JSON.parse(dados): []
   let sumentrada=0;
   let sumsaida=0;
@@ -82,16 +86,18 @@ export function Dashboard() {
       category: item.category,
       date,
     }
+  
   })
   setTransactionsData(transactionsFormatted)
+
   const lastTransactionEntrada = LastTransactionDate(transactions, 'entrada')
   const lastTransactionSaida = LastTransactionDate(transactions, 'saida')
   const transactionInital = new Date(transactions[0].date).getDate()
   const transactionFinal = DateFormatted(transactions.at(-1).date)
   const lastTransactionTotal = `${transactionInital} a ${transactionFinal}`
- 
-  
+
   const total = sumentrada - sumsaida;
+
   setResultCard({
     entrada:{
       totalsum: sumentrada.toLocaleString('pt-BR',{
@@ -116,31 +122,40 @@ export function Dashboard() {
     }
   })
   setIsLoading(false)
+    
+  } catch (error) {
+    console.log(error)
+  }
 
  }
  function LastTransactionDate(collection:TransactionCardProps[], type: 'entrada' | 'saida'){
-  const lastTransactions = Math.max.apply(Math, collection.filter(transaction => 
-  transaction.type === type).map(transaction=> new Date(transaction.date).getTime()))
-  const dateformatted = DateFormatted(lastTransactions)
-  return dateformatted
- }
+  const filterTransaction = collection.filter(transaction => 
+    transaction.type === type)
 
+    if(filterTransaction.length ===0){
+      return 0;
+    }
+    const lastransaction = new Date(Math.max(...filterTransaction.map(transaction => new Date(transaction.date).getTime())))
+    const dateFunction  = DateFormatted(lastransaction)
+    return dateFunction
+   
+ }
 
  async function deleteTrasaction(){
   await AsyncStorage.removeItem(datakey)
 
  }
- function DateFormatted(data:Date){
+ function DateFormatted(data:Date):string{
+  const dates = new Date(data)
   return Intl.DateTimeFormat('pt-BR',{
     day:'2-digit',
     month:'long',
     year:'numeric'
-  }).format(new Date(data))
+  }).format(dates)
 
  }
-
-
  useEffect(()=>{
+
   LoadingTrasaction()
   // deleteTrasaction()
   
@@ -150,27 +165,24 @@ export function Dashboard() {
 
 
  },[]))
-
-
   return (
     <Container>
     {
       isLoading ? 
       <LoadingContainer>
-        <ActivityIndicator color={theme.colors.primary} size="large"/> 
-      </LoadingContainer>
-      :
+        <ActivityIndicator color={theme.colors.primary} size="large"/>
+      </LoadingContainer> :
       <>
       <Header>
         <UserWrapper>
           <UserInfo>
-            <UserPhoto source={{ uri: 'https://avatars.githubusercontent.com/u/30248962?v=4' }} />
+            <UserPhoto source={{ uri: user.photo }} />
             <User>
               <UserGreeting>Olá</UserGreeting>
-              <UserName>Alquimara</UserName>
+              <UserName>{user.name}</UserName>
             </User>
           </UserInfo>
-          <LogoutButton>
+          <LogoutButton onPress={signOut}>
             <Icon name="power" />
           </LogoutButton>
         </UserWrapper>
