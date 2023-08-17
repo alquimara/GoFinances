@@ -21,7 +21,7 @@ import {
 import { HighlightCard } from '../../components/HighlightCard'
 import { TransactionCard, TransactionCardProps } from '../../components/TransactionCard'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { ActivityIndicator } from 'react-native'
 import { useTheme } from 'styled-components'
 import { useAuth } from '../../Hooks/Auth'
@@ -48,91 +48,94 @@ export function Dashboard() {
   const[resultcard, setResultCard] = useState<resultcarddata>({} as resultcarddata);
   const [isLoading,setIsLoading]= useState(true);
   const theme = useTheme();
-
-
-
-
+ 
  async function LoadingTrasaction(){
 
   try {
-    const dados = await AsyncStorage.getItem(datakey)
+  const dados = await AsyncStorage.getItem(datakey)
   const transactions = dados ? JSON.parse(dados): []
-  let sumentrada=0;
-  let sumsaida=0;
- 
-   const transactionsFormatted:TransactionListProps[] = transactions.map((item:TransactionListProps) =>{
-    if(item.type === 'entrada'){
-      sumentrada += Number(item.amount)
-    }else{
-      sumsaida+=Number(item.amount)
-    }
+  let sumentrada = 0;
+  let sumsaida = 0;
 
-    const amount = Number(item.amount).toLocaleString('pt-BR',{
-      style:'currency',
-      currency:'BRL'
-    });
-    
-    const date = Intl.DateTimeFormat('pt-BR',{
-      day:'2-digit',
-      month:'2-digit',
-      year:'2-digit'
-    }).format(new Date(item.date));
-
-    return{
-      id: item.id,
-      name: item.name,
-      amount,
-      type:item.type,
-      category: item.category,
-      date,
-    }
+    const transactionsFormatted:TransactionListProps[] = transactions.map((item:TransactionListProps) =>{
+   
+      if(item.type === 'entrada'){
+        sumentrada += Number(item.amount)
+      }else{
+        sumsaida+=Number(item.amount)
+      }
   
-  })
+      const amount = Number(item.amount).toLocaleString('pt-BR',{
+        style:'currency',
+        currency:'BRL'
+      });
+     
+      
+      const date = Intl.DateTimeFormat('pt-BR',{
+        day:'2-digit',
+        month:'2-digit',
+        year:'2-digit'
+      }).format(new Date(item.date));
+  
+      return{
+        id: item.id,
+        name: item.name,
+        amount,
+        type:item.type,
+        category: item.category,
+        date,
+      }
+    
+    })
   setTransactionsData(transactionsFormatted)
 
-  const lastTransactionEntrada = LastTransactionDate(transactions, 'entrada')
-  const lastTransactionSaida = LastTransactionDate(transactions, 'saida')
-  const transactionInital = new Date(transactions[0].date).getDate()
-  const transactionFinal = DateFormatted(transactions.at(-1).date)
-  const lastTransactionTotal = `${transactionInital} a ${transactionFinal}`
-
-  const total = sumentrada - sumsaida;
-
-  setResultCard({
-    entrada:{
-      totalsum: sumentrada.toLocaleString('pt-BR',{
-        style: 'currency',
-        currency:'BRL'
-      }),
-      lastTransaction:lastTransactionEntrada
-    },
-    saida:{
-      totalsum:sumsaida.toLocaleString('pt-BR',{
-        style:'currency',
-        currency:'BRL'
-      }),
-      lastTransaction:lastTransactionSaida
-    },
-    result:{
-      totalsum:total.toLocaleString('pt-BR',{
-        style:'currency',
-        currency: 'BRL'
-      }),
-      lastTransaction: lastTransactionTotal
-    }
-  })
-  setIsLoading(false)
-    
-  } catch (error) {
+   
+  
+    const lastTransactionEntrada = LastTransactionDate(transactions, 'entrada')
+    const lastTransactionSaida = LastTransactionDate(transactions, 'saida')
+    const transactionInital =  transactions.length === 0 ? 0 : new Date(transactions[0].date).getDate() 
+    const transactionFinal = transactions.length === 0 ? 0 : DateFormatted(transactions.at(-1).date)
+    const lastTransactionTotal = `${transactionInital} a ${transactionFinal}` 
+    const total = sumentrada > 0 && sumsaida > 0 ? sumentrada - sumsaida: 0
+ 
+    setResultCard({
+      entrada : {
+        totalsum: sumentrada.toLocaleString('pt-BR',{
+          style:'currency',
+          currency:'BRL'
+        }),
+        lastTransaction:lastTransactionEntrada 
+      },
+      saida:{
+        totalsum:sumsaida.toLocaleString('pt-BR',{
+          style:'currency',
+          currency:'BRL'
+        }),
+        lastTransaction:lastTransactionSaida
+      },
+      result:{
+        totalsum: total.toLocaleString('pt-BR',{
+          style:'currency',
+          currency: 'BRL'
+        }),
+        lastTransaction: lastTransactionTotal 
+      }
+    })
+    setIsLoading(false)
+  }
+   catch (error) {
     console.log(error)
   }
 
  }
  function LastTransactionDate(collection:TransactionCardProps[], type: 'entrada' | 'saida'){
+
+ 
   const filterTransaction = collection.filter(transaction => 
     transaction.type === type)
 
-    if(filterTransaction.length ===0){
+
+    if(filterTransaction.length === 0){
       return 0;
     }
     const lastransaction = new Date(Math.max(...filterTransaction.map(transaction => new Date(transaction.date).getTime())))
@@ -155,8 +158,7 @@ export function Dashboard() {
 
  }
  useEffect(()=>{
-
-  LoadingTrasaction()
+    LoadingTrasaction()
   // deleteTrasaction()
   
  },[])
@@ -188,9 +190,9 @@ export function Dashboard() {
         </UserWrapper>
       </Header>
       <HighlightCards>
-        <HighlightCard type="entrada" title='Entradas' amount={resultcard.entrada.totalsum} lastTransaction={`Ultima Transaçao ${resultcard.entrada.lastTransaction}`} />
-        <HighlightCard type="saida" title='Saidas' amount={resultcard.saida.totalsum} lastTransaction={`Ultima Transaçao ${resultcard.saida.lastTransaction}`} />
-        <HighlightCard type="total" title='Total' amount={resultcard.result.totalsum} lastTransaction={`Transações entre ${resultcard.result.lastTransaction}`} />
+        <HighlightCard type="entrada" title='Entradas' amount={resultcard.entrada.totalsum} lastTransaction={resultcard.entrada.lastTransaction===0 ? "Não existe transações" : `Ultima Entrada ${resultcard.saida.lastTransaction}`} />
+         <HighlightCard type="saida" title='Saidas' amount={resultcard.saida.totalsum} lastTransaction={resultcard.saida.lastTransaction===0 ?"Não existe transações" : `Ultima Saida ${resultcard.saida.lastTransaction}`} />
+        <HighlightCard type="total" title='Total' amount={resultcard.result.totalsum} lastTransaction={`Transações entre ${resultcard.result.lastTransaction}`} /> 
       </HighlightCards>
       <Transactions>
         <Title>Listagem</Title>

@@ -35,7 +35,7 @@ export default function App() {
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded || storangeLoading) {
+  if (!fontsLoaded) {
     return null
   }
 
